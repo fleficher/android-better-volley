@@ -1,2 +1,2 @@
-# android-better-volley
+# Android Better Volley
 Based on Google Android Volley networking library, with extra additions : OkHttp, streaming, ...
