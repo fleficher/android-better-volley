@@ -1,0 +1,22 @@
+
+apply plugin: 'com.android.library'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+    }
+}
+
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
+}
+
+apply from: 'rules.gradle'
+
+
+dependencies {
+}
