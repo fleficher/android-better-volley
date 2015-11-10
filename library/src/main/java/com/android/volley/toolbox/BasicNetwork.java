@@ -26,6 +26,7 @@ import com.android.volley.NetworkError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
+import com.android.volley.Request.ResponseType;
 import com.android.volley.RetryPolicy;
 import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
@@ -88,6 +89,7 @@ public class BasicNetwork implements Network {
         while (true) {
             HttpResponse httpResponse = null;
             byte[] responseContents = null;
+            InputStream responseInput = null;
             Map<String, String> responseHeaders = Collections.emptyMap();
             try {
                 // Gather headers.
@@ -103,7 +105,7 @@ public class BasicNetwork implements Network {
 
                     Entry entry = request.getCacheEntry();
                     if (entry == null) {
-                        return new NetworkResponse(HttpStatus.SC_NOT_MODIFIED, null,
+                        return new NetworkResponse(HttpStatus.SC_NOT_MODIFIED, null, null,
                                 responseHeaders, true,
                                 SystemClock.elapsedRealtime() - requestStart);
                     }
@@ -113,14 +115,18 @@ public class BasicNetwork implements Network {
                     // the new ones from the response.
                     // http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.5
                     entry.responseHeaders.putAll(responseHeaders);
-                    return new NetworkResponse(HttpStatus.SC_NOT_MODIFIED, entry.data,
+                    return new NetworkResponse(HttpStatus.SC_NOT_MODIFIED, entry.data, null,
                             entry.responseHeaders, true,
                             SystemClock.elapsedRealtime() - requestStart);
                 }
 
                 // Some responses such as 204s do not have content.  We must check.
                 if (httpResponse.getEntity() != null) {
-                  responseContents = entityToBytes(httpResponse.getEntity());
+                    if (request.getResponseType() == ResponseType.INPUTSTREAM) {
+                        responseInput = httpResponse.getEntity().getContent();
+                    } else if (request.getResponseType() == ResponseType.BYTES) {
+                        responseContents = entityToBytes(httpResponse.getEntity());
+                    }
                 } else {
                   // Add 0 byte response as a way of honestly representing a
                   // no-content request.
@@ -134,7 +140,7 @@ public class BasicNetwork implements Network {
                 if (statusCode < 200 || statusCode > 299) {
                     throw new IOException();
                 }
-                return new NetworkResponse(statusCode, responseContents, responseHeaders, false,
+                return new NetworkResponse(statusCode, responseContents, responseInput, responseHeaders, false,
                         SystemClock.elapsedRealtime() - requestStart);
             } catch (SocketTimeoutException e) {
                 attemptRetryOnException("socket", request, new TimeoutError());
@@ -152,7 +158,7 @@ public class BasicNetwork implements Network {
                 }
                 VolleyLog.e("Unexpected response code %d for %s", statusCode, request.getUrl());
                 if (responseContents != null) {
-                    networkResponse = new NetworkResponse(statusCode, responseContents,
+                    networkResponse = new NetworkResponse(statusCode, responseContents, responseInput,
                             responseHeaders, false, SystemClock.elapsedRealtime() - requestStart);
                     if (statusCode == HttpStatus.SC_UNAUTHORIZED ||
                             statusCode == HttpStatus.SC_FORBIDDEN) {

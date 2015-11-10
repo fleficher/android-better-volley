@@ -20,7 +20,6 @@ import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
 import android.text.TextUtils;
 
 import com.android.volley.VolleyLog.MarkerLog;
@@ -55,6 +54,18 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         int OPTIONS = 5;
         int TRACE = 6;
         int PATCH = 7;
+    }
+    /**
+     * Supported request response types.
+     *
+     * IGNORE : nothing will be returned to the callbacks.
+     * BYTES : The response wll be delivered as byte[]
+     * INPUTSTREAM : The response wll be delivered as an InputStream
+     */
+    public interface ResponseType {
+        int IGNORE = -1;
+        int BYTES = 0;
+        int INPUTSTREAM = 1;
     }
 
     /** An event log tracing the lifetime of this request; for debugging. */
@@ -563,6 +574,18 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         if (mErrorListener != null) {
             mErrorListener.onErrorResponse(error);
         }
+    }
+
+    /**
+     * Return the response type for this request which represents how volley will handle
+     * this request.
+     * Can be one of the values in {@link com.android.volley.Request.ResponseType}.
+     *
+     * Default is {@link ResponseType#BYTES}.
+     * @return The response type
+     */
+    public int getResponseType() {
+        return ResponseType.BYTES;
     }
 
     /**

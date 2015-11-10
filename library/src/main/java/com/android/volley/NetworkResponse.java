@@ -18,6 +18,7 @@ package com.android.volley;
 
 import org.apache.http.HttpStatus;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
 
@@ -33,10 +34,11 @@ public class NetworkResponse {
      * @param notModified True if the server returned a 304 and the data was already in cache
      * @param networkTimeMs Round-trip network time to receive network response
      */
-    public NetworkResponse(int statusCode, byte[] data, Map<String, String> headers,
+    public NetworkResponse(int statusCode, byte[] data, InputStream dataStream, Map<String, String> headers,
             boolean notModified, long networkTimeMs) {
         this.statusCode = statusCode;
         this.data = data;
+        this.dataStream = dataStream;
         this.headers = headers;
         this.notModified = notModified;
         this.networkTimeMs = networkTimeMs;
@@ -44,15 +46,15 @@ public class NetworkResponse {
 
     public NetworkResponse(int statusCode, byte[] data, Map<String, String> headers,
             boolean notModified) {
-        this(statusCode, data, headers, notModified, 0);
+        this(statusCode, data, null, headers, notModified, 0);
     }
 
     public NetworkResponse(byte[] data) {
-        this(HttpStatus.SC_OK, data, Collections.<String, String>emptyMap(), false, 0);
+        this(HttpStatus.SC_OK, data, null, Collections.<String, String>emptyMap(), false, 0);
     }
 
     public NetworkResponse(byte[] data, Map<String, String> headers) {
-        this(HttpStatus.SC_OK, data, headers, false, 0);
+        this(HttpStatus.SC_OK, data, null, headers, false, 0);
     }
 
     /** The HTTP status code. */
@@ -60,6 +62,8 @@ public class NetworkResponse {
 
     /** Raw data from this response. */
     public final byte[] data;
+
+    public final InputStream dataStream;
 
     /** Response headers. */
     public final Map<String, String> headers;
