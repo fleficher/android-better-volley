@@ -25,29 +25,63 @@ import java.io.File;
 
 public class Volley {
 
-    /** Default on-disk cache directory. */
+    /**
+     * Default on-disk cache directory.
+     */
     private static final String DEFAULT_CACHE_DIR = "volley";
 
     /**
      * Creates a default instance of the worker pool and calls {@link RequestQueue#start()} on it.
+     * You may set a maximum size of the disk cache in bytes.
      *
-     * @param context A {@link Context} to use for creating the cache dir.
-     * @param stack An {@link HttpStack} to use for the network, or null for default.
+     * @param context           A {@link Context} to use for creating the cache dir.
+     * @param stack             An {@link HttpStack} to use for the network, or null for default.
+     * @param maxDiskCacheBytes the maximum size of the disk cache, in bytes. Use -1 for default size.
      * @return A started {@link RequestQueue} instance.
      */
-    public static RequestQueue newRequestQueue(Context context, HttpStack stack) {
+    public static RequestQueue newRequestQueue(Context context, HttpStack stack, int maxDiskCacheBytes) {
         final File cacheDir = new File(context.getCacheDir(), DEFAULT_CACHE_DIR);
 
         if (stack == null) {
             stack = new OkHttpStack();
         }
+        final Network network = new BasicNetwork(stack);// Need Build.VERSION.SDK_INT >= 9
 
-        final Network network = new BasicNetwork(stack);
+        final RequestQueue queue;
+        if (maxDiskCacheBytes <= -1) {
+            // No maximum size specified
+            queue = new RequestQueue(new DiskBasedCache(cacheDir), network);
+        } else {
+            // Disk cache size specified
+            queue = new RequestQueue(new DiskBasedCache(cacheDir, maxDiskCacheBytes), network);
+        }
 
-        final RequestQueue queue = new RequestQueue(new DiskBasedCache(cacheDir), network);
         queue.start();
 
         return queue;
+    }
+
+    /**
+     * Creates a default instance of the worker pool and calls {@link RequestQueue#start()} on it.
+     * You may set a maximum size of the disk cache in bytes.
+     *
+     * @param context           A {@link Context} to use for creating the cache dir.
+     * @param maxDiskCacheBytes the maximum size of the disk cache, in bytes. Use -1 for default size.
+     * @return A started {@link RequestQueue} instance.
+     */
+    public static RequestQueue newRequestQueue(Context context, int maxDiskCacheBytes) {
+        return newRequestQueue(context, null, maxDiskCacheBytes);
+    }
+
+    /**
+     * Creates a default instance of the worker pool and calls {@link RequestQueue#start()} on it.
+     *
+     * @param context A {@link Context} to use for creating the cache dir.
+     * @param stack   An {@link HttpStack} to use for the network, or null for default.
+     * @return A started {@link RequestQueue} instance.
+     */
+    public static RequestQueue newRequestQueue(Context context, HttpStack stack) {
+        return newRequestQueue(context, stack, -1);
     }
 
     /**
@@ -59,4 +93,6 @@ public class Volley {
     public static RequestQueue newRequestQueue(Context context) {
         return newRequestQueue(context, null);
     }
+
 }
+

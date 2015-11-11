@@ -16,7 +16,7 @@
 
 package com.android.volley;
 
-import org.apache.http.HttpStatus;
+import com.android.volley.http.HttpResponse;
 
 import java.io.InputStream;
 import java.util.Collections;
@@ -50,11 +50,11 @@ public class NetworkResponse {
     }
 
     public NetworkResponse(byte[] data) {
-        this(HttpStatus.SC_OK, data, null, Collections.<String, String>emptyMap(), false, 0);
+        this(HttpResponse.SC_OK, data, null, Collections.<String, String>emptyMap(), false, 0);
     }
 
     public NetworkResponse(byte[] data, Map<String, String> headers) {
-        this(HttpStatus.SC_OK, data, null, headers, false, 0);
+        this(HttpResponse.SC_OK, data, null, headers, false, 0);
     }
 
     /** The HTTP status code. */
