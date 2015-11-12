@@ -161,9 +161,17 @@ public class VolleyLog {
         protected void finalize() throws Throwable {
             // Catch requests that have been collected (and hence end-of-lifed)
             // but had no debugging output printed for them.
-            if (!mFinished) {
-                finish("Request on the loose");
-                e("Marker log finalized without finish() - uncaught exit point for request");
+            try {
+                if (!mFinished) {
+                    finish("Request on the loose");
+                    e("Marker log finalized without finish() - uncaught exit point for request");
+                }
+            } finally {
+                try {
+                    super.finalize();
+                } catch (Throwable tr) {
+                    VolleyLog.e(tr, "Unhandled exception %s", tr.toString());
+                }
             }
         }
 

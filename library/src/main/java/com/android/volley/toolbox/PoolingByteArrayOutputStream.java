@@ -16,6 +16,8 @@
 
 package com.android.volley.toolbox;
 
+import com.android.volley.VolleyLog;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -62,7 +64,15 @@ public class PoolingByteArrayOutputStream extends ByteArrayOutputStream {
 
     @Override
     public void finalize() {
-        mPool.returnBuf(buf);
+        try {
+            mPool.returnBuf(buf);
+        } finally {
+            try {
+                super.finalize();
+            } catch (Throwable tr) {
+                VolleyLog.e(tr, "Unhandled exception %s", tr.toString());
+            }
+        }
     }
 
     /**

@@ -14,7 +14,7 @@ public class HttpResponse {
 	private int responseCode;
 	private String responseMessage;
 	private HttpEntity entityFromConnection;
-	private Map<String, String> httpHeaders = new HashMap<String, String>();
+	private final Map<String, String> httpHeaders = new HashMap<String, String>();
 
 	public HttpResponse(int responseCode, String responseMessage) {
 		this.setResponseCode(responseCode);
@@ -29,7 +29,7 @@ public class HttpResponse {
 		httpHeaders.put(key, value);
 	}
 
-	public Map<String, String>  getAllHeaders() {
+	public Map<String, String> getAllHeaders() {
 		return httpHeaders;
 	}
 
