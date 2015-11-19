@@ -21,7 +21,9 @@ OkHttp is developed by the Square team : https://github.com/square/okhttp
 
 <b>Using Gradle</b> :
 
-<code>TODO </code>
+```groovy
+compile 'com.fleficher.bettervolley:library:1.0.0'
+```
 
 <b>Old style jars</b> :
 
