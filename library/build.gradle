@@ -23,7 +23,7 @@ apply from: 'rules.gradle'
 
 
 dependencies {
-    compile 'com.squareup.okhttp:okhttp:2.5.0'
-    compile 'com.squareup.okhttp:okhttp-urlconnection:2.5.0'
+    compile 'com.squareup.okhttp:okhttp:2.7.1'
+    compile 'com.squareup.okhttp:okhttp-urlconnection:2.7.1'
     compile 'com.squareup.okio:okio:1.6.0'
 }
