@@ -126,11 +126,15 @@ public class BasicNetwork implements Network {
 				// Some responses such as 204s do not have content. We must
 				// check.
 				if (httpResponse.getEntity() != null) {
+					final HttpEntity entity = httpResponse.getEntity();
 					if (request.getResponseType() == ResponseType.INPUTSTREAM) {
-						responseInput = httpResponse.getEntity().getContent();
+						responseInput = entity.getContent();
                     } else if (request.getResponseType() == ResponseType.BYTES) {
-                        responseContents = entityToBytes(httpResponse.getEntity());
-                    }
+                        responseContents = entityToBytes(entity);
+                    } else {
+                        // Close the InputStream and release the resources
+                        entity.consumeContent();
+					}
 				} else {
 					// Add 0 byte response as a way of honestly representing a
 					// no-content request.
@@ -272,19 +276,18 @@ public class BasicNetwork implements Network {
 			}
 			return bytes.toByteArray();
 		} finally {
-			try {
-				// Close the InputStream and release the resources by
-				// "consuming the content".
-				entity.consumeContent();
-			} catch (Exception e) {
-				// This can happen if there was an exception above that left the
-				// entity in
-				// an invalid state.
-				VolleyLog.v("Error occured when calling consumingContent");
-			}
+            try {
+                // Close the InputStream and release the resources by
+                // "consuming the content".
+                entity.consumeContent();
+            } catch (Exception e) {
+                // This can happen if there was an exception above that left the
+                // entity in
+                // an invalid state.
+                VolleyLog.v("Error occured when calling consumingContent");
+            }
 			mPool.returnBuf(buffer);
 			bytes.close();
 		}
 	}
-
 }
